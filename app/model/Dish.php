@@ -10,11 +10,12 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\facade\Db;
+use think\Model;
 
-class Dish extends BaseModel
+class Dish extends Model
 {
     protected $type = [
-        'price'   => 'decimal:10,2',    // 定义为小数类型，最大10位，保留2位小数
+        'price' => 'decimal:10,2',    // 定义为小数类型，最大10位，保留2位小数
         'created_at' => 'datetime:Y-m-d H:i:s', // 日期格式化
     ];
     protected $table = 'dish';
@@ -34,8 +35,9 @@ class Dish extends BaseModel
             $item['price'] = (float)$item['price'];
             return $item;
         });
-        return Result::success("成功",$data);
+        return Result::success("成功", $data);
     }
+
     public function selectByPage($page, $pageSize, $status, $name, $categoryId)
     {
 
@@ -66,7 +68,7 @@ class Dish extends BaseModel
                 'records' => $list->items()
             ];
             return Result::success('查询成功', $result);
-        } catch (DataNotFoundException | ModelNotFoundException $e) {
+        } catch (DataNotFoundException|ModelNotFoundException $e) {
             // 特定异常处理：数据或模型未找到
             return Result::error('数据未找到: ' . $e->getMessage());
         } catch (\Throwable $e) {
@@ -79,7 +81,6 @@ class Dish extends BaseModel
     public function addDish($data)
     {
 
-        return json('dsa');
         $dishFlavors = new DishFlavor();
         $flavorsValue = str_replace('\\', '', $data['flavors'][0]['value']);
         $flavorsName = $data['flavors'][0]['name'];
@@ -95,7 +96,7 @@ class Dish extends BaseModel
 
         $data['create_user'] = 1;
         $data['update_user'] = 1;
-        return json('dsadsad');
+
         try {
             $this->save($data);
             $flavors = [
@@ -104,9 +105,9 @@ class Dish extends BaseModel
                 'dish_id' => $this->id,
             ];
             $dishFlavors->addFlavor($flavors);
-            return json(['code'=>200, 'message'=>'添加成功']);
+            return json(['code' => 200, 'message' => '添加成功']);
         } catch (\Exception $e) {
-            return   Result::error('添加失败: ' . $e->getMessage());
+            return Result::error('添加失败: ' . $e->getMessage());
         }
     }
 
@@ -186,9 +187,39 @@ class Dish extends BaseModel
     {
         try {
             $result = $this->find($id);
-            return Result::success('菜品查询成功', $result);
+            if (!$result) {
+                return Result::error('未找到对应菜品');
+            }
+            // 格式化价格字段
+            if (isset($result['price'])) {
+                $result['price'] = (float)$result['price'];
+            }
+            return json(['code' => 1, 'msg' => '', 'data' => $result]);
         } catch (\Exception $e) {
             return Result::error('菜品查询失败: ' . $e->getMessage());
         }
     }
+
+    /**
+     * 批量删除菜品及其关联数据
+     */
+    public function deleteByIds($idArray)
+    {
+        try {
+            foreach ($idArray as $id) {
+                // 删除与菜品关联的口味
+                $dishFlavor = new DishFlavor();
+                $dishFlavor->where('dish_id', $id)->delete();
+
+                // 删除菜品本身
+                $this->where('id', $id)->delete();
+            }
+
+            return Result::success('菜品批量删除成功');
+        } catch (\Exception $e) {
+            return Result::error('菜品批量删除失败: ' . $e->getMessage());
+        }
+    }
+
+
 }

@@ -2,7 +2,9 @@
 
 namespace app\model;
 use app\common\BaseModel;
-class SetmealDish extends BaseModel
+use think\Model;
+
+class SetmealDish extends Model
 {
     protected $table = 'setmeal_dish';
     protected $pk = 'id';

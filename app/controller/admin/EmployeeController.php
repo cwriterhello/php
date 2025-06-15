@@ -6,9 +6,27 @@ use app\BaseController;
 use app\common\Result;
 use app\model\Employee;
 use app\Request;
+use Firebase\JWT\JWT;
 
 class EmployeeController extends BaseController
 {
+
+//    public function login(Request $request)
+//    {
+//        $data = $request->only(['username', 'password']);
+//        $employee = new Employee();
+//
+//        try {
+//            $emp = $employee->where('username', $data['username'])->find();
+//            if ($emp && $emp->password == $data['password']) {
+//                return Result::success('登录成功', $emp);
+//            } else {
+//                return Result::error('用户名或密码错误');
+//            }
+//        } catch (\Exception $e) {
+//            return Result::error('登录失败: ' . $e->getMessage());
+//        }
+//    }
 
     public function login(Request $request)
     {
@@ -16,17 +34,29 @@ class EmployeeController extends BaseController
         $employee = new Employee();
 
         try {
-            $user = $employee->where('username', $data['username'])->find();
-            if ($user && $user->password == $data['password']) {
-                return Result::success('登录成功', $user);
+            $emp = $employee->where('username', $data['username'])->find();
+            if ($emp && $emp->password == $data['password']) {
+                // 生成 JWT Token
+                $key = "yoursecretkey"; // 建议配置在 config 文件中
+                $payload = [
+                    'exp' => time() + 3600, // 1小时过期
+                    'id' => $emp->id,
+                ];
+
+                $token = JWT::encode($payload, $key, 'HS256');
+                $result = [];
+                $result['id'] = $emp->id;
+                $result['name'] = $emp->name;
+                $result['userName'] = $emp->username;
+                $result['token'] = $token;
+                return Result::success(null, $result);
             } else {
                 return Result::error('用户名或密码错误');
             }
         } catch (\Exception $e) {
-            return Result::error('登录失败: ' . $e->getMessage());
+            return Result::error($e->getMessage());
         }
     }
-
     /**
      * 分页查询员工列表
      * @param int $page 当前页码
@@ -49,7 +79,7 @@ class EmployeeController extends BaseController
 
     /**
      * 添加员工
-     * @param string $username 员工账号
+     * @param string $empname 员工账号
      * @param string $name 员工姓名
      * @param string $phone 员工电话
      * @param string $gender 员工性别
@@ -82,9 +112,9 @@ class EmployeeController extends BaseController
 
     public function updateStatus($status, Request $request)
     {
-        $userId = $request->param('id');
+        $empId = $request->param('id');
         $emp = new Employee();
-        return $emp->updateStatus($status, $userId);
+        return $emp->updateStatus($status, $empId);
     }
 
     public function getById($id)

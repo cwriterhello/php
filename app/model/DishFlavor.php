@@ -3,9 +3,10 @@
 namespace app\model;
 use app\common\BaseModel;
 use app\common\Result;
+use think\Model;
 use think\Request;
 
-class DishFlavor extends BaseModel
+class DishFlavor extends Model
 {
 
     protected $table = 'dish_flavor';

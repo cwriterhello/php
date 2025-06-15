@@ -6,8 +6,9 @@ use app\common\Result;
 use app\common\BaseModel;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
+use think\Model;
 
-class Category extends BaseModel
+class Category extends Model
 {
 
     protected $table = 'category';

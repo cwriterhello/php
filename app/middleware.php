@@ -9,5 +9,5 @@ return [
      //\think\middleware\SessionInit::class,
      //\app\middleware\Check::class,
     // app/middleware.php
-
+    app\middleware\JwtAuth::class
 ];

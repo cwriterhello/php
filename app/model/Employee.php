@@ -9,9 +9,10 @@ use app\common\Result;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\Model;
 
 
-class Employee extends BaseModel
+class Employee extends Model
 {
 
     protected $table = 'employee';

@@ -5,6 +5,7 @@ namespace app\controller\admin;
 use app\common\Result;
 use app\model\Category;
 use app\model\Dish;
+use app\model\Setmeal;
 use app\Request;
 use think\db\exception\DbException;
 
@@ -41,20 +42,23 @@ class DishController
         return $dish->listByCategory($categoryId);
     }
 
+    public function delete(Request $request)
+    {
+        $ids = $request->param('ids'); // 获取逗号分隔的ID字符串
+        $idArray = explode(',', $ids); // 转换为数组
+
+        $dish = new Dish();
+        return $dish->deleteByIds($idArray);
+    }
+
+
+    /**
+     * 获取菜品详情
+     */
     public function getById($id)
     {
         $dish = new Dish();
         return $dish->getById($id);
-    }
-
-    /**
-     * 删除分类
-     */
-    public function delete(Request $request)
-    {
-        $id = $request->param('id');
-        $category = new Category();
-        return $category->deleteById($id);
     }
 
     /**
